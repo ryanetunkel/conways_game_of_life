@@ -1,1 +1,1 @@
-# conways_game_of_life
+A recreation of Conway's Game of Life
