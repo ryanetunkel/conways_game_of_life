@@ -35,6 +35,10 @@ edited_grid = []
 MIN_ZOOM = 4
 MAX_ZOOM = 128
 mouse_pos = (0,0)
+current_idx = (0,0)
+start_idx = (0,0)
+new_start_idx = True
+erase = False
 play = False
 num_cells = 0
 gen = 0
@@ -48,6 +52,8 @@ rand = False
 interim = False
 
 first_grid = True
+
+location = False
 
 
 def create_grid(width:int=0,height:int=0,empty:bool=False) -> tuple[list[list[int]],int]:
@@ -249,6 +255,7 @@ while True:
     (mouse_x,mouse_y) = pygame.mouse.get_pos()
     mouse_pos = (mouse_x,mouse_y)
     keys_pressed = pygame.key.get_pressed()
+    mouse_pressed = pygame.mouse.get_pressed()
 
     for event in pygame.event.get():
         if first_grid:
@@ -268,16 +275,9 @@ while True:
                     zoom = MAX_ZOOM if abs(MAX_ZOOM-zoom) <= abs(MIN_ZOOM-zoom) else MIN_ZOOM
 
         # Checking Location
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            print((math.floor(mouse_x/zoom)-offset_x),(math.floor(mouse_y/zoom)-offset_y))
-
-        # Placing Cells
-        if edit:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    x_idx = (math.floor(mouse_x/zoom)-offset_x)
-                    y_idx = (math.floor(mouse_y/zoom)-offset_y)
-                    grid[y_idx][x_idx] = not grid[y_idx][x_idx]
+        if location:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                print((math.floor(mouse_x/zoom)-offset_x),(math.floor(mouse_y/zoom)-offset_y))
 
         # Key Press
         if event.type == pygame.KEYDOWN:
@@ -355,6 +355,22 @@ while True:
         offset_y -= pan_speed
 
     pygame.draw.rect(screen,"#000000",(0,0,WINDOW_WIDTH,WINDOW_HEIGHT))
+
+
+    # Placing Cells
+    if edit:
+        if mouse_pressed[0]:
+            x_idx = (math.floor(mouse_x/zoom)-offset_x)
+            y_idx = (math.floor(mouse_y/zoom)-offset_y)
+            if new_start_idx:
+                new_start_idx = False
+                erase = True if grid[y_idx][x_idx] else False
+            if current_idx != (x_idx,y_idx):
+                replacement = 0 if erase else 1
+                grid[y_idx][x_idx] = replacement
+            current_idx = (x_idx,y_idx)
+        else:
+            new_start_idx = True
 
     if grid:
         display_grid(grid,zoom,offset_x,offset_y)
