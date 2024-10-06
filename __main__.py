@@ -22,6 +22,8 @@ CELL_CHANCE = 5
 
 screen = pygame.display.set_mode(WINDOW_SIZE)
 pygame.display.set_caption("Conway's Game of Life")
+pygame_icon = pygame.image.load("icon.png").convert_alpha()
+pygame.display.set_icon(pygame_icon)
 
 clock = pygame.time.Clock()
 
