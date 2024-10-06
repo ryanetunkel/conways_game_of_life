@@ -151,7 +151,7 @@ def calc_next_step(grid:list[list[int]]) -> tuple[list[list[int]],int]:
     return (new_grid,count)
 
 
-def display_instructions() -> tuple[pygame.Rect,pygame.Rect]:
+def display_instructions() -> pygame.Rect:
     # Surfs and Rects
     instructions_surf = font.render("Reset: [Space]    Pause/Play: [Enter]    Exit: [Esc]", False, "#00FF00")
     instructions_rect = instructions_surf.get_rect(center = (WINDOW_WIDTH*1/2,WINDOW_HEIGHT*15/16))
@@ -166,14 +166,15 @@ def display_instructions() -> tuple[pygame.Rect,pygame.Rect]:
     draw_surf = pygame.Surface((width, height), pygame.SRCALPHA)
     draw_surf.fill(pygame.Color("#22222299"))
     draw_coords = (left,top)
+    return_rect = pygame.Rect((left,top,width,height))
     # Blits
     screen.blit(draw_surf,draw_coords)
     screen.blit(instructions_surf,instructions_rect)
     screen.blit(controls_surf,controls_rect)
-    return (instructions_rect,instructions_rect)
+    return return_rect
 
 
-def display_gen_and_pop(generation:int,population:int) -> tuple[pygame.Rect,pygame.Rect]:
+def display_gen_and_pop(generation:int,population:int) -> pygame.Rect:
     # Surfs and Rects
     generation_surf = font.render(f"Generation: {generation}", False, "#00FF00")
     generation_rect = generation_surf.get_rect(midleft = (0,WINDOW_HEIGHT*1/32))
@@ -188,14 +189,15 @@ def display_gen_and_pop(generation:int,population:int) -> tuple[pygame.Rect,pyga
     draw_surf = pygame.Surface((width, height), pygame.SRCALPHA)
     draw_surf.fill(pygame.Color("#22222299"))
     draw_coords = (left,top)
+    return_rect = pygame.Rect((left,top,width,height))
     # Blits
     screen.blit(draw_surf,draw_coords)
     screen.blit(generation_surf,generation_rect)
     screen.blit(population_surf,population_rect)
-    return (generation_rect,population_rect)
+    return return_rect
 
 
-def display_options(edit:bool=False,blank:bool=True,rand:bool=False,) -> tuple[pygame.Rect,pygame.Rect,pygame.Rect]:
+def display_options(edit:bool=False,blank:bool=True,rand:bool=False,) -> pygame.Rect:
     # Colors
     edit_color = "#22222299" if not edit else "#55555599"
     blank_color = "#22222299" if not blank else "#55555599"
@@ -240,6 +242,8 @@ def display_options(edit:bool=False,blank:bool=True,rand:bool=False,) -> tuple[p
     random_draw_surf.fill(pygame.Color(rand_color))
     random_draw_coords = (left,random_top)
 
+    return_rect = pygame.Rect(left,edit_top,width,edit_height+blank_height+random_height)
+
     # Blits
     screen.blit(edit_draw_surf,edit_draw_coords)
     screen.blit(blank_draw_surf,blank_draw_coords)
@@ -248,7 +252,7 @@ def display_options(edit:bool=False,blank:bool=True,rand:bool=False,) -> tuple[p
     screen.blit(blank_surf,blank_rect)
     screen.blit(random_surf,random_rect)
 
-    return (edit_rect,blank_rect,random_rect)
+    return return_rect
 
 
 def display_texts(
@@ -257,7 +261,7 @@ def display_texts(
     edit:bool,
     blank:bool,
     rand:bool
-) -> tuple[tuple[pygame.Rect,pygame.Rect],tuple[pygame.Rect,pygame.Rect],tuple[pygame.Rect,pygame.Rect,pygame.Rect],]:
+) -> tuple[pygame.Rect,pygame.Rect,pygame.Rect]:
     return (display_instructions(), display_gen_and_pop(generation,population), display_options(edit,blank,rand))
 
 
@@ -367,11 +371,13 @@ while True:
     if edit:
         if mouse_pressed[0]:
             placement = True
-            for rect_tuple in rects:
-                for rect in rect_tuple:
-                    if rect:
-                        if rect.collidepoint(mouse_x,mouse_y):
-                            placement = False
+            for rect in rects:
+                if rect:
+                    print(rect.topleft)
+                    print(mouse_x,mouse_y)
+                    print(rect.collidepoint(mouse_x,mouse_y))
+                    if rect.collidepoint(mouse_x,mouse_y):
+                        placement = False
             if placement:
                 x_idx = (math.floor(mouse_x/zoom)-offset_x)
                 y_idx = (math.floor(mouse_y/zoom)-offset_y)
@@ -380,6 +386,9 @@ while True:
                     erase = True if grid[y_idx][x_idx] else False
                 if current_idx != (x_idx,y_idx):
                     replacement = 0 if erase else 1
+                    pop_change = -1 if erase else 1
+                    if grid[y_idx][x_idx] != replacement:
+                        num_cells+=pop_change
                     grid[y_idx][x_idx] = replacement
                 current_idx = (x_idx,y_idx)
         else:
