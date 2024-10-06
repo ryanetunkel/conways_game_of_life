@@ -373,9 +373,6 @@ while True:
             placement = True
             for rect in rects:
                 if rect:
-                    print(rect.topleft)
-                    print(mouse_x,mouse_y)
-                    print(rect.collidepoint(mouse_x,mouse_y))
                     if rect.collidepoint(mouse_x,mouse_y):
                         placement = False
             if placement:
